@@ -1,4 +1,3 @@
-```markdown
 # Guest Room Control  
 ## Home Assistant Gateway (Concept Phase)
 
@@ -74,4 +73,3 @@ Migration to the existing Kubernetes cluster is planned **after** the applicatio
 - Implement whitelist-based access control
 - Prepare for later containerization and Kubernetes deployment
 - Bridge development and infrastructure thinking in a practical smart home use case
-```
