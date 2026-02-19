@@ -146,12 +146,12 @@
         const alias = control.dataset.alias;
         const nextState = control.checked;
 
-        setSuccess(statusEl, "Sending...");
+        setSuccess(statusEl, "");
         try {
-          const result = await postJson(`${API_BASE}/api/lights/${alias}`, { on: nextState });
-          setSuccess(statusEl, `Updated: ${JSON.stringify(result)}`);
+          await postJson(`${API_BASE}/api/lights/${alias}`, { on: nextState });
+          setSuccess(statusEl, "");
         } catch (error) {
-          setError(statusEl, `Request failed: ${error.message}`);
+          setError(statusEl, `Fehler: ${error.message}`);
         }
       });
     });
@@ -176,12 +176,12 @@
         const endpoint = slider.dataset.endpoint;
         const value = Number(slider.value);
 
-        setSuccess(statusEl, "Sending...");
+        setSuccess(statusEl, ""); // optional: "…"
         try {
-          const result = await postJson(`${API_BASE}/api/blinds/${endpoint}`, { value });
-          setSuccess(statusEl, `Updated: ${JSON.stringify(result)}`);
+          await postJson(`${API_BASE}/api/blinds/${endpoint}`, { value });
+          setSuccess(statusEl, ""); // Erfolg: nichts anzeigen
         } catch (error) {
-          setError(statusEl, `Request failed: ${error.message}`);
+          setError(statusEl, `Fehler: ${error.message}`);
         }
       });
     });

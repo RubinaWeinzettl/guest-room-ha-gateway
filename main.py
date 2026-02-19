@@ -5,13 +5,11 @@ import httpx
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from entities import LIGHTS
+from entities import COVERS
 from config import get_settings
-
-import entities
-print("USING ENTITIES FROM:", entities.__file__)
 
 settings = get_settings()
 app = FastAPI()
@@ -60,6 +58,12 @@ class LightCommand(BaseModel):
 
     on: bool
 
+class BlindCommand(BaseModel):
+    """Request payload for setting blind position or tilt."""
+
+    value: int = Field(ge=0, le=100)
+
+
 
 @app.post("/api/lights/{alias}")
 def set_light(alias: str, cmd: LightCommand):
@@ -100,4 +104,53 @@ def set_light(alias: str, cmd: LightCommand):
 def list_lights():
     """Return all whitelisted light aliases."""
     return {"aliases": sorted(LIGHTS.keys())}
+
+@app.post("/api/blinds/position")
+def set_blind_position(cmd: BlindCommand):
+    """Set blind open/close position (0=open, 100=closed)."""
+
+    entity_id = COVERS.get("room_blind")
+    if not entity_id:
+        raise HTTPException(status_code=500, detail="Blind entity not configured")
+
+    url = f"{app.state.ha_base_url}/api/services/cover/set_cover_position"
+    headers = {"Authorization": f"Bearer {app.state.ha_token}"}
+    payload = {"entity_id": entity_id, "position": cmd.value}
+
+    try:
+        resp = httpx.post(url, headers=headers, json=payload, timeout=10.0)
+        resp.raise_for_status()
+        return {"entity_id": entity_id, "position": cmd.value, "result": "ok"}
+    except httpx.HTTPStatusError as exc:
+        raise HTTPException(
+            status_code=exc.response.status_code,
+            detail=exc.response.text,
+        ) from exc
+    except httpx.RequestError as exc:
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
+
+
+@app.post("/api/blinds/tilt")
+def set_blind_tilt(cmd: BlindCommand):
+    """Set blind tilt (0=open, 100=closed)."""
+
+    entity_id = COVERS.get("room_blind")
+    if not entity_id:
+        raise HTTPException(status_code=500, detail="Blind entity not configured")
+
+    url = f"{app.state.ha_base_url}/api/services/cover/set_cover_tilt_position"
+    headers = {"Authorization": f"Bearer {app.state.ha_token}"}
+    payload = {"entity_id": entity_id, "tilt_position": cmd.value}
+
+    try:
+        resp = httpx.post(url, headers=headers, json=payload, timeout=10.0)
+        resp.raise_for_status()
+        return {"entity_id": entity_id, "tilt_position": cmd.value, "result": "ok"}
+    except httpx.HTTPStatusError as exc:
+        raise HTTPException(
+            status_code=exc.response.status_code,
+            detail=exc.response.text,
+        ) from exc
+    except httpx.RequestError as exc:
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
 

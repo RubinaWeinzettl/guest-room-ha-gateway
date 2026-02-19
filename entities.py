@@ -8,14 +8,16 @@ from __future__ import annotations
 
 from typing import Final
 
-# Aliases for allowed `light` domain entities.
-LIGHTS: Final[dict[str, str]] = {
-    "ceiling": "light.guest_room_ceiling",
-    "lamp": "light.guest_room_lamp",
+LIGHTS: Final[dict[str, str]] = {...}
+COVERS: Final[dict[str, str]] = {...}
+
+LIGHTS: dict[str, str] = {
+    "bath_light": "light.gastebad_licht",
+    "bath_mirror": "light.gastebad_spiegel_licht",
+    "room_couch": "light.gastezimmer_couch_licht_2",
+    "room_main": "light.gastezimmer_licht",
 }
 
-# Aliases for allowed `cover` domain entities.
-COVERS: Final[dict[str, str]] = {
-    "blinds": "cover.guest_room_blinds",
-    "shade": "cover.guest_room_shade",
+COVERS: dict[str, str] = {
+    "room_blind": "cover.gastezimmer_2",
 }
