@@ -19,5 +19,5 @@ LIGHTS: dict[str, str] = {
 }
 
 COVERS: dict[str, str] = {
-    "room_blind": "cover.gastezimmer_2",
+    "room_blind": "cover.gaestezimmer",
 }
