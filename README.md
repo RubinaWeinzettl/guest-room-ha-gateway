@@ -1,7 +1,3 @@
-Natürlich.
-Hier ist die **vollständig konsistent formatierte README.md**, alles innerhalb eines einzigen Markdown-Codeblocks:
-
-````markdown
 # Guest Room Home Assistant Gateway
 
 A minimal FastAPI-based gateway that exposes a restricted web interface for controlling selected Home Assistant entities inside a guest room.
