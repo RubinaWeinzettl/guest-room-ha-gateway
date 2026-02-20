@@ -1,49 +1,190 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>Bootstrap 5 Example</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Guest Room Gateway</title> 
   <link rel="stylesheet" href="/vendor/bootstrap/css/bootstrap.min.css">
-  <script src="/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 </head>
-<body>
+<body class="bg-light">
+  <main class="container py-4 py-md-5">
+    <h1 class="mb-4">Gästezimmer-Steuerung</h1> <!--Guest Room Gateway-->
 
-<div class="container-fluid p-5 bg-primary text-white text-center">
-  <h1>My First Bootstrap Page</h1>
-  <p>Resize this responsive page to see the effect!</p> 
-</div>
-  
-<div class="container mt-5">
-  <div class="row">
-    <div class="col-sm-4">
-      <h3>Column 1</h3>
-      <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit...</p>
-      <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris...</p>
-    </div>
-    <div class="col-sm-4">
-      <h3>Column 2</h3>
-      <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit...</p>
-      <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris...</p>
-    </div>
-    <div class="col-sm-4">
-      <h3>Column 3</h3>        
-      <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit...</p>
-      <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris...</p>
-    </div>
-  </div>
-</div>
+    <section class="mb-5" aria-labelledby="lights-heading">
+      <h2 id="lights-heading" class="h4 mb-3">Lichter</h2> <!--Lights-->
+      <div class="card">
+        <div class="card-body">
+          <div class="mb-3">
+            <div class="form-check form-switch">
+              <input class="form-check-input light-switch" type="checkbox" id="bath-light" data-alias="bath_light">
+              <label class="form-check-label" for="bath-light">Badezimmer-Licht</label> <!--Bathroom Light-->
+            </div>
+            <div id="status-bath-light" class="form-text text-muted">Aus/Ein</div> <!--Off/On-->
+          </div>
 
+          <div class="mb-3">
+            <div class="form-check form-switch">
+              <input class="form-check-input light-switch" type="checkbox" id="bath-mirror" data-alias="bath_mirror">
+              <label class="form-check-label" for="bath-mirror">Badezimmer-Spiegel-Licht</label> <!--Bathroom Mirror-->
+            </div>
+            <div id="status-bath-mirror" class="form-text text-muted">Aus/Ein</div> <!--Off/On-->
+          </div>
+
+          <div class="mb-3">
+            <div class="form-check form-switch">
+              <input class="form-check-input light-switch" type="checkbox" id="room-main" data-alias="room_main">
+              <label class="form-check-label" for="room-main">Büro-Licht</label> <!--Office Light-->
+            </div>
+            <div id="status-room-main" class="form-text text-muted">Aus/Ein</div> <!--Off/On-->
+          </div>
+
+          <div>
+            <div class="form-check form-switch">
+              <input class="form-check-input light-switch" type="checkbox" id="room-couch" data-alias="room_couch">
+              <label class="form-check-label" for="room-couch">Couch-Licht</label> <!--Room Couch Light-->
+            </div>
+            <div id="status-room-couch" class="form-text text-muted">Aus/Ein</div> <!--Off/On-->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section aria-labelledby="blinds-heading">
+      <h2 id="blinds-heading" class="h4 mb-3">Rollo / Jalousie</h2> <!--Blinds-->
+      <div class="card">
+        <div class="card-body">
+          <div class="mb-4">
+            <label for="blind-position" class="form-label">
+              Position Rollo (rauf und runter) <!--Blind Position-->
+              <span class="text-muted">rauf/runter</span> <!--(alias: room_blind_position)-->
+              <span id="blind-position-value" class="fw-semibold">0 %</span>
+            </label>
+            <input
+              type="range"
+              class="form-range"
+              id="blind-position"
+              min="0"
+              max="100"
+              value="0"
+              data-endpoint="position"
+            >
+            <div id="status-blind-position" class="form-text text-muted">offen - zu</div>
+          </div>
+
+          <div>
+            <label for="blind-tilt" class="form-label">
+              Rollo kippen <!--Blind Tilt-->
+              <span class="text-muted">zu x % öffnen / schließen</span> <!--(alias: room_blind_tilt)-->
+              <span id="blind-tilt-value" class="fw-semibold">0 %</span>
+            </label>
+            <input
+              type="range"
+              class="form-range"
+              id="blind-tilt"
+              min="0"
+              max="100"
+              value="0"
+              data-endpoint="tilt"
+            >
+            <div id="status-blind-tilt" class="form-text text-muted">offen - gekippt</div> <!-- (alias: room_blind_tilt)-->
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script>
+    const API_BASE = "http://127.0.0.1:8000";
+
+    /**
+     * Update a status element with success text.
+     * @param {HTMLElement} el
+     * @param {string} message
+     */
+    function setSuccess(el, message) {
+      el.textContent = message;
+      el.classList.remove("text-danger");
+      el.classList.add("text-muted");
+    }
+
+    /**
+     * Update a status element with error text.
+     * @param {HTMLElement} el
+     * @param {string} message
+     */
+    function setError(el, message) {
+      el.textContent = message;
+      el.classList.remove("text-muted");
+      el.classList.add("text-danger");
+    }
+
+    /**
+     * Send a JSON POST request.
+     * @param {string} url
+     * @param {Record<string, unknown>} payload
+     * @returns {Promise<unknown>}
+     */
+    async function postJson(url, payload) {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        const message = data && data.detail ? String(data.detail) : `HTTP ${response.status}`;
+        throw new Error(message);
+      }
+      return data;
+    }
+
+    document.querySelectorAll(".light-switch").forEach((control) => {
+      const statusEl = document.getElementById(`status-${control.id}`);
+      control.addEventListener("change", async () => {
+        const alias = control.dataset.alias;
+        const nextState = control.checked;
+
+        setSuccess(statusEl, "");
+        try {
+          await postJson(`${API_BASE}/api/lights/${alias}`, { on: nextState });
+          setSuccess(statusEl, "");
+        } catch (error) {
+          setError(statusEl, `Fehler: ${error.message}`);
+        }
+      });
+    });
+
+    [
+      {
+        slider: document.getElementById("blind-position"),
+        valueEl: document.getElementById("blind-position-value"),
+        statusEl: document.getElementById("status-blind-position"),
+      },
+      {
+        slider: document.getElementById("blind-tilt"),
+        valueEl: document.getElementById("blind-tilt-value"),
+        statusEl: document.getElementById("status-blind-tilt"),
+      },
+    ].forEach(({ slider, valueEl, statusEl }) => {
+      slider.addEventListener("input", () => {
+        valueEl.textContent = slider.value;
+      });
+
+      slider.addEventListener("change", async () => {
+        const endpoint = slider.dataset.endpoint;
+        const value = Number(slider.value);
+
+        setSuccess(statusEl, ""); // optional: "…"
+        try {
+          await postJson(`${API_BASE}/api/blinds/${endpoint}`, { value });
+          setSuccess(statusEl, ""); // Erfolg: nichts anzeigen
+        } catch (error) {
+          setError(statusEl, `Fehler: ${error.message}`);
+        }
+      });
+    });
+  </script>
 </body>
 </html>
-
-<button id="btn" class="btn btn-primary">Health check</button>
-<pre id="out" class="mt-3"></pre>
-
-<script>
-  document.getElementById("btn").addEventListener("click", async () => {
-    const res = await fetch("http://127.0.0.1:8000/health");
-    const data = await res.json();
-    document.getElementById("out").textContent = JSON.stringify(data, null, 2);
-  });
-</script>
