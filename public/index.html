@@ -95,7 +95,7 @@
 
   <script src="/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
   <script>
-    const API_BASE = "http://127.0.0.1:8000";
+    const API_BASE = "/api";
 
     /**
      * Update a status element with success text.
@@ -148,7 +148,7 @@
 
         setSuccess(statusEl, "");
         try {
-          await postJson(`${API_BASE}/api/lights/${alias}`, { on: nextState });
+          await postJson(`${API_BASE}/lights/${alias}`, { on: nextState });
           setSuccess(statusEl, "");
         } catch (error) {
           setError(statusEl, `Fehler: ${error.message}`);
@@ -178,7 +178,7 @@
 
         setSuccess(statusEl, ""); // optional: "…"
         try {
-          await postJson(`${API_BASE}/api/blinds/${endpoint}`, { value });
+          await postJson(`${API_BASE}/blinds/${endpoint}`, { value });
           setSuccess(statusEl, ""); // Erfolg: nichts anzeigen
         } catch (error) {
           setError(statusEl, `Fehler: ${error.message}`);
